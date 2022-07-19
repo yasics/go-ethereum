@@ -43,7 +43,7 @@ import (
 	// Force-load the tracer engines to trigger registration
 	_ "github.com/ethereum/go-ethereum/eth/tracers/js"
 	_ "github.com/ethereum/go-ethereum/eth/tracers/native"
-
+    //目录在go\pkg\mod\github.com，使用go get
 	"github.com/urfave/cli/v2"
 )
 
@@ -274,6 +274,7 @@ func main() {
 func prepare(ctx *cli.Context) {
 	// If we're running a known preset, log it for convenience.
 	switch {
+	//检查flag是否被设置。switch 后可以不接任何变量、表达式、函数，相当于 if - elseif - else
 	case ctx.IsSet(utils.RopstenFlag.Name):
 		log.Info("Starting Geth on Ropsten testnet...")
 
@@ -311,6 +312,7 @@ func prepare(ctx *cli.Context) {
 		log.Info("Starting Geth on Ethereum mainnet...")
 	}
 	// If we're a full node on mainnet without --cache specified, bump default cache allowance
+	//查找StringFlag的值，SyncModeFlag是自定义的flag
 	if ctx.String(utils.SyncModeFlag.Name) != "light" && !ctx.IsSet(utils.CacheFlag.Name) && !ctx.IsSet(utils.NetworkIdFlag.Name) {
 		// Make sure we're not on any supported preconfigured testnet either
 		if !ctx.IsSet(utils.RopstenFlag.Name) &&
@@ -324,6 +326,7 @@ func prepare(ctx *cli.Context) {
 			ctx.Set(utils.CacheFlag.Name, strconv.Itoa(4096))
 		}
 	}
+	//dayend
 	// If we're running a light client on any network, drop the cache to some meaningfully low amount
 	if ctx.String(utils.SyncModeFlag.Name) == "light" && !ctx.IsSet(utils.CacheFlag.Name) {
 		log.Info("Dropping default light client cache", "provided", ctx.Int(utils.CacheFlag.Name), "updated", 128)
@@ -341,6 +344,7 @@ func prepare(ctx *cli.Context) {
 // It creates a default node based on the command line arguments and runs it in
 // blocking mode, waiting for it to be shut down.
 func geth(ctx *cli.Context) error {
+	//为什么args大于0是错误？？ FlagSet.Args returns the non-flag arguments.
 	if args := ctx.Args().Slice(); len(args) > 0 {
 		return fmt.Errorf("invalid command: %q", args[0])
 	}

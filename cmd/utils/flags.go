@@ -81,7 +81,7 @@ var (
 	DataDirFlag = &flags.DirectoryFlag{
 		Name:     "datadir",
 		Usage:    "Data directory for the databases and keystore",
-		Value:    flags.DirectoryString(node.DefaultDataDir()),
+		Value:    flags.DirectoryString(node.DefaultDataDir()),//默认值
 		Category: flags.EthCategory,
 	}
 	RemoteDBFlag = &cli.StringFlag{
