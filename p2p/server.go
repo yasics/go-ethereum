@@ -455,12 +455,12 @@ func (srv *Server) Start() (err error) {
 		srv.log.Warn("P2P server will be useless, neither dialing nor listening")
 	}
 
-	// static fields
+	// static fields, 匿名字段Config里
 	if srv.PrivateKey == nil {
 		return errors.New("Server.PrivateKey must be set to a non-nil key")
 	}
 	if srv.newTransport == nil {
-		srv.newTransport = newRLPX
+		srv.newTransport = newRLPX//使用rlxp协议，函数指针
 	}
 	if srv.listenFunc == nil {
 		srv.listenFunc = net.Listen
@@ -807,7 +807,7 @@ running:
 	// is closed.
 	for len(peers) > 0 {
 		p := <-srv.delpeer
-		p.log.Trace("<-delpeer (spindown)")
+		p.log.Trace("<-delpeer (spindown)")newPeer
 		delete(peers, p.ID())
 	}
 }

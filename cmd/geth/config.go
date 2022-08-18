@@ -129,13 +129,13 @@ func makeConfigNode(ctx *cli.Context) (*node.Node, gethConfig) {
 
 	// Load config file.
 	if file := ctx.String(configFileFlag.Name); file != "" {
-		if err := loadConfig(file, &cfg); err != nil {
+		if err := loadConfig(file, &cfg); err != nil { //从文件读配置到cfg结构体
 			utils.Fatalf("%v", err)
 		}
 	}
 
 	// Apply flags.
-	utils.SetNodeConfig(ctx, &cfg.Node)
+	utils.SetNodeConfig(ctx, &cfg.Node)//从ctx查相应的flag key，设置node cfg的字段
 	stack, err := node.New(&cfg.Node)
 	if err != nil {
 		utils.Fatalf("Failed to create the protocol stack: %v", err)
@@ -163,6 +163,7 @@ func makeFullNode(ctx *cli.Context) (*node.Node, ethapi.Backend) {
 	if ctx.IsSet(utils.OverrideTerminalTotalDifficulty.Name) {
 		cfg.Eth.OverrideTerminalTotalDifficulty = flags.GlobalBig(ctx, utils.OverrideTerminalTotalDifficulty.Name)
 	}
+	//注册以太坊服务
 	backend, eth := utils.RegisterEthService(stack, &cfg.Eth)
 	// Warn users to migrate if they have a legacy freezer format.
 	if eth != nil && !ctx.IsSet(utils.IgnoreLegacyReceiptsFlag.Name) {

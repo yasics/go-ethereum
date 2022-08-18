@@ -129,7 +129,7 @@ func (h *httpServer) start() error {
 		return nil // already running or not configured
 	}
 
-	// Initialize the server.
+	// Initialize the server. handler为h，因为它实现了ServeHTTP函数
 	h.server = &http.Server{Handler: h}
 	if h.timeouts != (rpc.HTTPTimeouts{}) {
 		CheckTimeouts(&h.timeouts)
@@ -143,6 +143,7 @@ func (h *httpServer) start() error {
 	if err != nil {
 		// If the server fails to start, we need to clear out the RPC and WS
 		// configuration so they can be configured another time.
+		//这个跟start顺序有关
 		h.disableRPC()
 		h.disableWS()
 		return err
@@ -209,7 +210,7 @@ func (h *httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if checkPath(r, h.httpConfig.prefix) {
-			rpc.ServeHTTP(w, r)
+			rpc.ServeHTTP(w, r)//这个调用的是http.Handler的方法，不是server *rpc.Server的方法
 			return
 		}
 	}

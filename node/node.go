@@ -77,10 +77,11 @@ const (
 func New(conf *Config) (*Node, error) {
 	// Copy config and resolve the datadir so future changes to the current
 	// working directory don't affect the node.
+	//*号取值，之后复制这个结构体给confCopy
 	confCopy := *conf
-	conf = &confCopy
+	conf = &confCopy//不影响原始的conf
 	if conf.DataDir != "" {
-		absdatadir, err := filepath.Abs(conf.DataDir)
+		absdatadir, err := filepath.Abs(conf.DataDir)//相对地址转换为绝对地址
 		if err != nil {
 			return nil, err
 		}
@@ -101,10 +102,10 @@ func New(conf *Config) (*Node, error) {
 	if strings.HasSuffix(conf.Name, ".ipc") {
 		return nil, errors.New(`Config.Name cannot end in ".ipc"`)
 	}
-
+	//node初始化，生成p2p的server和inprocHandler
 	node := &Node{
 		config:        conf,
-		inprocHandler: rpc.NewServer(),
+		inprocHandler: rpc.NewServer(),//rpc.Server
 		eventmux:      new(event.TypeMux),
 		log:           conf.Logger,
 		stop:          make(chan struct{}),
@@ -112,14 +113,14 @@ func New(conf *Config) (*Node, error) {
 		databases:     make(map[*closeTrackingDB]struct{}),
 	}
 
-	// Register built-in APIs.
+	// Register built-in APIs. node的built-in RPC APIs，里面的service是接收者实例，包含方法
 	node.rpcAPIs = append(node.rpcAPIs, node.apis()...)
 
-	// Acquire the instance directory lock.
+	// Acquire the instance directory lock.锁住node cfg名字的文件夹目录
 	if err := node.openDataDir(); err != nil {
 		return nil, err
 	}
-	keyDir, isEphem, err := getKeyStoreDir(conf)
+	keyDir, isEphem, err := getKeyStoreDir(conf)//生成KeyStore目录
 	if err != nil {
 		return nil, err
 	}
@@ -152,11 +153,11 @@ func New(conf *Config) (*Node, error) {
 	}
 
 	// Configure RPC servers.
-	node.http = newHTTPServer(node.log, conf.HTTPTimeouts)
+	node.http = newHTTPServer(node.log, conf.HTTPTimeouts) //node.httpServer
 	node.httpAuth = newHTTPServer(node.log, conf.HTTPTimeouts)
 	node.ws = newHTTPServer(node.log, rpc.DefaultHTTPTimeouts)
 	node.wsAuth = newHTTPServer(node.log, rpc.DefaultHTTPTimeouts)
-	node.ipc = newIPCServer(node.log, conf.IPCEndpoint())
+	node.ipc = newIPCServer(node.log, conf.IPCEndpoint()) //包含rpc.Server
 
 	return node, nil
 }
@@ -270,6 +271,7 @@ func (n *Node) doClose(errs []error) error {
 func (n *Node) openEndpoints() error {
 	// start networking endpoints
 	n.log.Info("Starting peer-to-peer node", "instance", n.server.Name)
+	//启动p2p.Server，p2p.Server
 	if err := n.server.Start(); err != nil {
 		return convertFileLockError(err)
 	}
